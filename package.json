@@ -1,0 +1,54 @@
+{
+  "name": "tugas3-vue-ut",
+  "version": "1.0.0",
+  "description": "Aplikasi Pemesanan & Distribusi Bahan Ajar Universitas Terbuka (UT)",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "serve": "http-server . -p 8000 -c-1",
+    "dev": "live-server --port=8000",
+    "build": "echo 'No build process needed - static files ready for deployment'",
+    "deploy": "echo 'Upload files to your web server or hosting provider'"
+  },
+  "keywords": [
+    "vue.js",
+    "universitas-terbuka",
+    "bahan-ajar",
+    "inventory-management",
+    "delivery-tracking",
+    "order-management"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "vue": "^2.7.14"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "live-server": "^1.2.2"
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ],
+  "techStack": {
+    "frontend": "Vue.js 2",
+    "styling": "Bootstrap 5",
+    "icons": "Font Awesome 6",
+    "data": "JSON files",
+    "architecture": "Component-based SPA"
+  },
+  "features": [
+    "Stock Management dengan CRUD operations",
+    "Delivery Order Tracking dengan progress timeline",
+    "Order Form dengan validasi lengkap", 
+    "Responsive design untuk semua device",
+    "Real-time search dan filtering",
+    "Modal confirmations",
+    "Flash messages untuk user feedback",
+    "Keyboard shortcuts untuk produktivitas"
+  ]
+}

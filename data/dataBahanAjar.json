@@ -1,0 +1,196 @@
+{
+  "bahanAjar": [
+    {
+      "id": 1,
+      "kode": "EKMA4111",
+      "judul": "Pengantar Ekonomi Makro",
+      "kategori": "Ekonomi",
+      "upbjj": "UT-Jakarta",
+      "lokasiRak": "A1-001",
+      "harga": 85000,
+      "qty": 150,
+      "safety": 50,
+      "status": "aktif",
+      "catatanHTML": "<b>Buku utama</b> untuk program S1 Ekonomi.<br/><small>Edisi terbaru tahun 2024</small>"
+    },
+    {
+      "id": 2,
+      "kode": "MKDU4111",
+      "judul": "Pendidikan Agama Islam",
+      "kategori": "MKDU",
+      "upbjj": "UT-Bandung",
+      "lokasiRak": "B2-015",
+      "harga": 65000,
+      "qty": 25,
+      "safety": 30,
+      "status": "aktif",
+      "catatanHTML": "Mata kuliah <em>wajib</em> untuk semua program.<br/>Tersedia dalam bahasa Indonesia dan Arab."
+    },
+    {
+      "id": 3,
+      "kode": "FISI4101",
+      "judul": "Fisika Dasar I",
+      "kategori": "Fisika",
+      "upbjj": "UT-Surabaya",
+      "lokasiRak": "C3-022",
+      "harga": 95000,
+      "qty": 0,
+      "safety": 20,
+      "status": "tidak_aktif",
+      "catatanHTML": "<span class='text-danger'>Stok habis</span><br/>Sedang dalam proses <b>restock</b>"
+    },
+    {
+      "id": 4,
+      "kode": "MTK4110",
+      "judul": "Kalkulus I",
+      "kategori": "Matematika",
+      "upbjj": "UT-Jakarta",
+      "lokasiRak": "A2-008",
+      "harga": 78000,
+      "qty": 80,
+      "safety": 25,
+      "status": "aktif",
+      "catatanHTML": "Buku referensi utama untuk <b>Matematika</b> dan <b>Statistika</b>."
+    },
+    {
+      "id": 5,
+      "kode": "BING4201",
+      "judul": "Bahasa Inggris I",
+      "kategori": "Bahasa",
+      "upbjj": "UT-Medan",
+      "lokasiRak": "D1-035",
+      "harga": 72000,
+      "qty": 45,
+      "safety": 40,
+      "status": "aktif",
+      "catatanHTML": "Dilengkapi dengan <b>audio CD</b> untuk listening practice."
+    },
+    {
+      "id": 6,
+      "kode": "ADPU4130",
+      "judul": "Pengantar Ilmu Administrasi",
+      "kategori": "Administrasi",
+      "upbjj": "UT-Jakarta",
+      "lokasiRak": "A3-012",
+      "harga": 88000,
+      "qty": 15,
+      "safety": 20,
+      "status": "aktif",
+      "catatanHTML": "Buku dasar untuk jurusan <em>Administrasi Publik</em>."
+    },
+    {
+      "id": 7,
+      "kode": "MKDU4110",
+      "judul": "Bahasa Indonesia",
+      "kategori": "MKDU",
+      "upbjj": "UT-Yogyakarta",
+      "lokasiRak": "B1-005",
+      "harga": 60000,
+      "qty": 120,
+      "safety": 50,
+      "status": "aktif",
+      "catatanHTML": "<b>Wajib</b> untuk semua mahasiswa.<br/>Edisi revisi 2023."
+    },
+    {
+      "id": 8,
+      "kode": "SKOM4101",
+      "judul": "Pengantar Ilmu Komunikasi",
+      "kategori": "Komunikasi",
+      "upbjj": "UT-Makassar",
+      "lokasiRak": "E2-018",
+      "harga": 92000,
+      "qty": 35,
+      "safety": 30,
+      "status": "aktif",
+      "catatanHTML": "Buku teks utama program <b>Ilmu Komunikasi</b>."
+    }
+  ],
+  "deliveryOrders": [
+    {
+      "id": 1,
+      "nomorDO": "DO2025-001",
+      "nim": "530012345",
+      "nama": "Ahmad Sudarsono",
+      "ekspedisi": "JNE",
+      "paket": "Paket Ekonomi Semester 1",
+      "detailPaket": [
+        {"kode": "EKMA4111", "judul": "Pengantar Ekonomi Makro", "qty": 1},
+        {"kode": "MKDU4111", "judul": "Pendidikan Agama Islam", "qty": 1}
+      ],
+      "tanggalKirim": "15 November 2024",
+      "totalHarga": 150000,
+      "statusProgress": [
+        {
+          "waktu": "2024-11-15T08:00:00",
+          "keterangan": "Paket diterima di gudang"
+        },
+        {
+          "waktu": "2024-11-15T10:30:00",
+          "keterangan": "Paket dalam proses packing"
+        },
+        {
+          "waktu": "2024-11-15T14:00:00",
+          "keterangan": "Paket dikirim ke ekspedisi JNE"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "nomorDO": "DO2025-002",
+      "nim": "530098765",
+      "nama": "Siti Rahayu",
+      "ekspedisi": "TIKI",
+      "paket": "Paket MKDU Lengkap",
+      "detailPaket": [
+        {"kode": "MKDU4111", "judul": "Pendidikan Agama Islam", "qty": 1},
+        {"kode": "MKDU4110", "judul": "Bahasa Indonesia", "qty": 1}
+      ],
+      "tanggalKirim": "18 November 2024",
+      "totalHarga": 125000,
+      "statusProgress": [
+        {
+          "waktu": "2024-11-18T09:15:00",
+          "keterangan": "Pesanan diterima"
+        },
+        {
+          "waktu": "2024-11-18T11:00:00",
+          "keterangan": "Sedang diproses"
+        }
+      ]
+    }
+  ],
+  "ekspedisiOptions": ["JNE", "TIKI", "POS Indonesia", "Sicepat", "J&T"],
+  "paketOptions": [
+    {
+      "nama": "Paket Ekonomi Semester 1",
+      "items": [
+        {"kode": "EKMA4111", "judul": "Pengantar Ekonomi Makro"},
+        {"kode": "MKDU4111", "judul": "Pendidikan Agama Islam"}
+      ],
+      "totalHarga": 150000
+    },
+    {
+      "nama": "Paket MKDU Lengkap",
+      "items": [
+        {"kode": "MKDU4111", "judul": "Pendidikan Agama Islam"},
+        {"kode": "MKDU4110", "judul": "Bahasa Indonesia"}
+      ],
+      "totalHarga": 125000
+    },
+    {
+      "nama": "Paket Matematika Dasar",
+      "items": [
+        {"kode": "MTK4110", "judul": "Kalkulus I"}
+      ],
+      "totalHarga": 78000
+    },
+    {
+      "nama": "Paket Bahasa Inggris",
+      "items": [
+        {"kode": "BING4201", "judul": "Bahasa Inggris I"}
+      ],
+      "totalHarga": 72000
+    }
+  ],
+  "upbjjOptions": ["UT-Jakarta", "UT-Bandung", "UT-Surabaya", "UT-Medan", "UT-Yogyakarta", "UT-Makassar", "UT-Denpasar", "UT-Pontianak"]
+}

@@ -1,0 +1,33 @@
+<template id="tpl-crud-modal">
+  <div v-if="show">
+    <div class="modal fade show" style="display: block;" tabindex="-1">
+      <div class="modal-dialog modal-dialog-large modal-dialog-scrollable modal-fullscreen-sm-down">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">
+              <i :class="titleIcon"></i> {{ title }}
+            </h5>
+            <button type="button" class="btn-close" @click="$emit('cancel')"></button>
+          </div>
+          <div class="modal-body">
+            <slot></slot>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" @click="$emit('cancel')">
+              <i class="fas fa-times"></i> Batal
+            </button>
+            <button 
+              type="button" 
+              class="btn btn-primary" 
+              @click="$emit('submit')"
+              :disabled="loading"
+            >
+              <i class="fas fa-save"></i> {{ submitText }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+  </div>
+</template>

@@ -1,0 +1,217 @@
+<template id="tpl-tracking">
+  <div>
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-bottom py-3">
+        <h5 class="mb-0 text-primary fw-bold">
+          <i class="fas fa-truck me-2"></i>Tracking Delivery Order (DO)
+        </h5>
+      </div>
+      <div class="card-body p-4">
+        <!-- Search Section -->
+        <div class="row justify-content-center mb-5">
+          <div class="col-md-8 text-center">
+            <h4 class="mb-3 fw-light text-muted">Lacak Status Pengiriman</h4>
+            <div class="input-group input-group-lg shadow-sm">
+              <span class="input-group-text bg-white border-end-0 ps-4">
+                <i class="fas fa-search text-primary"></i>
+              </span>
+              <input 
+                type="text" 
+                class="form-control border-start-0" 
+                placeholder="Masukkan Nomor DO atau NIM mahasiswa..."
+                v-model="searchTerm"
+                @keyup.enter="performSearch"
+                @keyup.esc="resetSearch"
+              />
+              <button class="btn btn-primary px-4" @click="performSearch">Cari</button>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-3">
+              <small class="text-muted">
+                <i class="fas fa-info-circle me-1"></i>Tekan Enter untuk pencarian cepat
+              </small>
+              <div class="btn-group">
+                <button class="btn btn-sm btn-outline-secondary" @click="resetSearch" v-if="searchTerm">
+                  <i class="fas fa-times me-1"></i>Reset
+                </button>
+                <button class="btn btn-sm btn-outline-primary" @click="showAddFormMethod">
+                  <i class="fas fa-plus me-1"></i>Buat DO Baru
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Search Results Info -->
+        <div v-if="searchTerm" class="alert alert-info border-0 bg-info bg-opacity-10 mb-4">
+          <div class="d-flex align-items-center">
+            <i class="fas fa-search me-2"></i>
+            <span>Menampilkan hasil pencarian untuk: <strong>"{{ searchTerm }}"</strong> ({{ filteredOrders.length }} ditemukan)</span>
+          </div>
+        </div>
+
+        <!-- DO List -->
+        <div class="row g-4">
+          <div v-for="order in filteredOrders" :key="order.id" class="col-lg-6">
+            <div class="card h-100 border shadow-sm hover-shadow transition-all">
+              <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                <div>
+                  <span class="badge bg-primary me-2">DO</span>
+                  <span class="fw-bold text-dark">{{ order.nomorDO }}</span>
+                </div>
+                <small class="text-muted"><i class="far fa-calendar-alt me-1"></i>{{ formatDate(order.tanggalKirim) }}</small>
+              </div>
+              <div class="card-body">
+                <!-- Info Grid -->
+                <div class="row g-3 mb-4">
+                  <div class="col-6">
+                    <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Penerima</small>
+                    <div class="fw-medium">{{ order.nama }}</div>
+                    <div class="small text-muted">{{ order.nim }}</div>
+                  </div>
+                  <div class="col-6">
+                    <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Ekspedisi</small>
+                    <div class="fw-medium">{{ order.ekspedisi }}</div>
+                    <div class="small text-success fw-bold">{{ formatCurrency(order.totalHarga) }}</div>
+                  </div>
+                </div>
+
+                <!-- Package Details -->
+                <div class="bg-light p-3 rounded mb-4">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <small class="fw-bold text-uppercase text-muted">Isi Paket: {{ order.paket }}</small>
+                  </div>
+                  <ul class="list-unstyled mb-0 small" v-if="order.detailPaket && order.detailPaket.length > 0">
+                    <li v-for="item in order.detailPaket" :key="item.kode" class="mb-1 text-muted">
+                      <i class="fas fa-check text-success me-2" style="font-size: 0.8em;"></i>
+                      {{ item.judul }} <span class="text-secondary">({{ item.kode }})</span>
+                      <span v-if="item.qty > 1" class="badge bg-secondary ms-1">{{ item.qty }}x</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- Timeline -->
+                <div class="position-relative ps-3 border-start border-2 ms-2">
+                  <div v-for="(progress, index) in order.statusProgress" :key="index" class="mb-3 position-relative">
+                    <div class="position-absolute top-0 start-0 translate-middle bg-white" style="left: -19px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--ut-primary);"></div>
+                    <div class="ms-3">
+                      <div class="small text-muted fw-bold">{{ formatDateTime(progress.waktu) }}</div>
+                      <div class="text-dark">{{ progress.keterangan }}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Add Progress Form -->
+                <div v-if="showProgressForm[order.id]" class="mt-3 pt-3 border-top bg-light p-3 rounded">
+                  <h6 class="small fw-bold mb-2">Update Status Pengiriman</h6>
+                  <form @submit.prevent="addProgress(order.id)">
+                    <div class="mb-2">
+                      <input type="datetime-local" class="form-control form-control-sm" v-model="newProgress[order.id].waktu" required />
+                    </div>
+                    <div class="mb-2">
+                      <input type="text" class="form-control form-control-sm" v-model="newProgress[order.id].keterangan" placeholder="Keterangan status..." required />
+                    </div>
+                    <div class="d-flex gap-2 justify-content-end">
+                      <button type="button" class="btn btn-sm btn-light" @click="cancelProgress(order.id)">Batal</button>
+                      <button type="submit" class="btn btn-sm btn-primary">Simpan</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+              <div class="card-footer bg-white border-top-0 pt-0 pb-3 text-end" v-if="!showProgressForm[order.id]">
+                <button class="btn btn-sm btn-outline-primary rounded-pill px-3" @click="startAddProgress(order.id)">
+                  <i class="fas fa-pen me-1"></i>Update Status
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div v-if="filteredOrders.length === 0" class="text-center py-5">
+          <div class="opacity-50 mb-3">
+            <i class="fas fa-truck fa-4x text-muted"></i>
+          </div>
+          <h5 class="text-muted fw-normal">Belum ada data pengiriman</h5>
+          <p class="text-muted small">Gunakan tombol "Buat DO Baru" untuk memulai pengiriman.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add DO Modal -->
+    <crud-modal
+      :show="showAddForm"
+      title="Buat Delivery Order Baru"
+      title-icon="fas fa-shipping-fast"
+      submit-text="Proses Pengiriman"
+      @submit="submitNewDO"
+      @cancel="cancelAddForm"
+    >
+      <form @submit.prevent="submitNewDO">
+        <div class="row g-4">
+          <div class="col-md-12">
+            <div class="alert alert-primary d-flex align-items-center border-0 bg-primary bg-opacity-10" role="alert">
+              <i class="fas fa-info-circle me-2 text-primary"></i>
+              <div>
+                Nomor DO akan digenerate otomatis: <strong>{{ newDO.nomorDO }}</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label small fw-bold text-uppercase text-muted">NIM Mahasiswa <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" v-model="newDO.nim" pattern="[0-9]{9}" placeholder="530012345" required />
+          </div>
+          
+          <div class="col-md-6">
+            <label class="form-label small fw-bold text-uppercase text-muted">Tanggal Kirim <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" v-model="newDO.tanggalKirimInput" required />
+          </div>
+
+          <div class="col-md-12">
+            <label class="form-label small fw-bold text-uppercase text-muted">Nama Penerima <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" v-model="newDO.nama" placeholder="Nama Lengkap" required />
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label small fw-bold text-uppercase text-muted">Ekspedisi <span class="text-danger">*</span></label>
+            <select class="form-select" v-model="newDO.ekspedisi" required>
+              <option value="">Pilih Ekspedisi</option>
+              <option v-for="ekspedisi in ekspedisiOptions" :key="ekspedisi" :value="ekspedisi">{{ ekspedisi }}</option>
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label small fw-bold text-uppercase text-muted">Paket Bahan Ajar <span class="text-danger">*</span></label>
+            <select class="form-select" v-model="newDO.paket" @change="onPaketChange" required>
+              <option value="">Pilih Paket</option>
+              <option v-for="paket in paketOptions" :key="paket.nama" :value="paket.nama">
+                {{ paket.nama }} - {{ formatCurrency(paket.totalHarga) }}
+              </option>
+            </select>
+          </div>
+
+          <div class="col-12" v-if="selectedPaketDetail">
+            <div class="card border bg-light">
+              <div class="card-body">
+                <h6 class="card-title small fw-bold text-uppercase text-muted mb-3">Detail Isi Paket</h6>
+                <ul class="list-group list-group-flush bg-transparent">
+                  <li v-for="item in selectedPaketDetail.items" :key="item.kode" class="list-group-item bg-transparent px-0 py-2 d-flex justify-content-between align-items-center">
+                    <span>
+                      <span class="fw-medium">{{ item.kode }}</span>
+                      <span class="text-muted mx-2">-</span>
+                      {{ item.judul }}
+                    </span>
+                  </li>
+                </ul>
+                <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                  <span class="fw-bold text-dark">Total Nilai Paket</span>
+                  <span class="h5 mb-0 text-primary fw-bold">{{ formatCurrency(selectedPaketDetail.totalHarga) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </crud-modal>
+  </div>
+</template>

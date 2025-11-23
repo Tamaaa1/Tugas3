@@ -1,0 +1,248 @@
+<template id="tpl-order">
+  <div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom py-3">
+      <h5 class="mb-0 text-primary fw-bold">
+        <i class="fas fa-shopping-cart me-2"></i>Form Pemesanan Bahan Ajar
+      </h5>
+    </div>
+    <div class="card-body p-4">
+      <form @submit.prevent="submitOrder">
+        <!-- Customer Info Section -->
+        <div class="row g-4 mb-4">
+          <div class="col-lg-8">
+            <div class="card border bg-light h-100">
+              <div class="card-body">
+                <h6 class="text-primary mb-3"><i class="fas fa-user-circle me-2"></i>Data Pemesan</h6>
+                <div class="row g-3">
+                  <div class="col-md-4">
+                    <label class="form-label small fw-bold text-uppercase text-muted">NIM <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" v-model="orderForm.nim" pattern="[0-9]{9}" placeholder="530012345" required />
+                    <div class="form-text">9 digit angka</div>
+                  </div>
+                  <div class="col-md-8">
+                    <label class="form-label small fw-bold text-uppercase text-muted">Nama Lengkap <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" v-model="orderForm.nama" placeholder="Nama Mahasiswa" required />
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small fw-bold text-uppercase text-muted">Email <span class="text-danger">*</span></label>
+                    <input type="email" class="form-control" v-model="orderForm.email" placeholder="email@example.com" required />
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small fw-bold text-uppercase text-muted">No. Telepon <span class="text-danger">*</span></label>
+                    <input type="tel" class="form-control" v-model="orderForm.telepon" placeholder="08123456789" required />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="card border bg-light h-100">
+              <div class="card-body">
+                <h6 class="text-primary mb-3"><i class="fas fa-map-marker-alt me-2"></i>Alamat Pengiriman</h6>
+                <div class="mb-3">
+                  <label class="form-label small fw-bold text-uppercase text-muted">Alamat Lengkap <span class="text-danger">*</span></label>
+                  <textarea class="form-control" v-model="orderForm.alamat" rows="3" placeholder="Jalan, RT/RW, Kelurahan..." required></textarea>
+                </div>
+                <div class="row g-3">
+                  <div class="col-6">
+                    <label class="form-label small fw-bold text-uppercase text-muted">Kota <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" v-model="orderForm.kota" placeholder="Jakarta" required />
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label small fw-bold text-uppercase text-muted">Kode Pos <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" v-model="orderForm.kodePos" pattern="[0-9]{5}" placeholder="12345" required />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Item Selection -->
+        <div class="card border mb-4">
+          <div class="card-header bg-white py-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <h6 class="mb-0 text-primary fw-bold"><i class="fas fa-book me-2"></i>Pilih Bahan Ajar</h6>
+              <div class="d-flex gap-2">
+                <select class="form-select form-select-sm" v-model="itemFilter.upbjj" style="width: 150px;">
+                  <option value="">Semua UPBJJ</option>
+                  <option v-for="upbjj in uniqueUpbjj" :key="upbjj" :value="upbjj">{{ upbjj }}</option>
+                </select>
+                <input type="text" class="form-control form-control-sm" v-model="itemFilter.search" placeholder="Cari..." style="width: 200px;" />
+              </div>
+            </div>
+          </div>
+          <div class="card-body p-0">
+            <!-- Desktop Table View -->
+            <div class="table-responsive d-none d-md-block" style="max-height: 400px;">
+              <table class="table table-hover table-striped mb-0 align-middle">
+                <thead class="table-light sticky-top">
+                  <tr>
+                    <th class="ps-4" width="50">Pilih</th>
+                    <th>Kode</th>
+                    <th>Judul</th>
+                    <th>Kategori</th>
+                    <th class="text-end">Harga</th>
+                    <th class="text-center" width="100">Qty</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="item in filteredBahanAjar" :key="item.id">
+                    <td class="ps-4">
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" :value="item" v-model="selectedItems" @change="calculateTotal">
+                      </div>
+                    </td>
+                    <td class="fw-medium">{{ item.kode }}</td>
+                    <td>{{ item.judul }}</td>
+                    <td><span class="badge bg-light text-dark border">{{ item.kategori }}</span></td>
+                    <td class="text-end fw-bold">{{ formatCurrency(item.harga) }}</td>
+                    <td class="text-center">
+                      <input type="number" class="form-control form-control-sm text-center" 
+                             v-model.number="itemQuantities[item.id]" 
+                             :disabled="!isItemSelected(item)" 
+                             min="1" :max="item.qty" 
+                             @input="calculateTotal">
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Mobile Card View -->
+            <div class="d-md-none p-3" style="max-height: 500px; overflow-y: auto;">
+              <div v-for="item in filteredBahanAjar" :key="item.id" class="card border mb-3 shadow-sm" :class="{'border-primary bg-primary bg-opacity-10': isItemSelected(item)}">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" :value="item" v-model="selectedItems" @change="calculateTotal" :id="'check-' + item.id">
+                      <label class="form-check-label fw-bold text-primary" :for="'check-' + item.id">
+                        {{ item.kode }}
+                      </label>
+                    </div>
+                    <span class="badge bg-light text-dark border">{{ item.kategori }}</span>
+                  </div>
+                  
+                  <div class="mb-2 fw-medium">{{ item.judul }}</div>
+                  
+                  <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="fw-bold">{{ formatCurrency(item.harga) }}</div>
+                    <div style="width: 100px;">
+                      <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white">Qty</span>
+                        <input type="number" class="form-control text-center" 
+                               v-model.number="itemQuantities[item.id]" 
+                               :disabled="!isItemSelected(item)" 
+                               min="1" :max="item.qty" 
+                               @input="calculateTotal">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Summary & Payment -->
+        <div class="row g-4">
+          <div class="col-lg-6">
+            <div class="card border h-100">
+              <div class="card-body">
+                <h6 class="text-primary mb-3"><i class="fas fa-truck me-2"></i>Pengiriman & Pembayaran</h6>
+                
+                <div class="mb-3">
+                  <label class="form-label small fw-bold text-uppercase text-muted">Ekspedisi <span class="text-danger">*</span></label>
+                  <select class="form-select" v-model="orderForm.ekspedisi" required>
+                    <option value="">Pilih Ekspedisi</option>
+                    <option value="JNE">JNE (2-3 hari)</option>
+                    <option value="TIKI">TIKI (2-4 hari)</option>
+                    <option value="POS Indonesia">POS Indonesia (3-5 hari)</option>
+                    <option value="Sicepat">Sicepat (1-2 hari)</option>
+                    <option value="J&T">J&T (2-3 hari)</option>
+                  </select>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label small fw-bold text-uppercase text-muted">Metode Pembayaran <span class="text-danger">*</span></label>
+                  <div class="d-flex flex-wrap gap-3">
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" v-model="orderForm.metodePembayaran" value="transfer" id="pay_transfer">
+                      <label class="form-check-label" for="pay_transfer">Transfer Bank</label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" v-model="orderForm.metodePembayaran" value="cod" id="pay_cod">
+                      <label class="form-check-label" for="pay_cod">COD</label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" v-model="orderForm.metodePembayaran" value="ewallet" id="pay_ewallet">
+                      <label class="form-check-label" for="pay_ewallet">E-Wallet</label>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mb-0">
+                  <label class="form-label small fw-bold text-uppercase text-muted">Catatan (Opsional)</label>
+                  <textarea class="form-control" v-model="orderForm.catatan" rows="2" placeholder="Catatan pesanan..."></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="card border bg-primary bg-opacity-10 h-100">
+              <div class="card-body">
+                <h6 class="text-primary mb-3"><i class="fas fa-receipt me-2"></i>Ringkasan Pesanan</h6>
+                
+                <div class="d-flex justify-content-between mb-2">
+                  <span class="text-muted">Total Item</span>
+                  <span class="fw-bold">{{ totalQuantity }} pcs</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                  <span class="text-muted">Subtotal</span>
+                  <span class="fw-bold">{{ formatCurrency(totalHarga) }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-3">
+                  <span class="text-muted">Ongkos Kirim</span>
+                  <span class="fw-bold">{{ formatCurrency(estimatedShipping) }}</span>
+                </div>
+                
+                <hr class="border-primary opacity-25">
+                
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                  <span class="h5 mb-0 text-primary">Total Bayar</span>
+                  <span class="h4 mb-0 text-primary fw-bold">{{ formatCurrency(totalHarga + estimatedShipping) }}</span>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm" 
+                        :disabled="selectedItems.length === 0 || !orderForm.metodePembayaran">
+                  <i class="fas fa-check-circle me-2"></i>Buat Pesanan
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      <!-- Order History -->
+      <div v-if="orderHistory.length > 0" class="mt-5">
+        <h6 class="text-muted text-uppercase small fw-bold mb-3">Riwayat Pesanan Terakhir</h6>
+        <div class="list-group shadow-sm">
+          <div v-for="order in orderHistory" :key="order.id" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center p-3">
+            <div>
+              <div class="fw-bold text-primary">{{ order.id }} - {{ order.nama }}</div>
+              <small class="text-muted">
+                <i class="far fa-calendar me-1"></i>{{ order.tanggal }} &bull; 
+                <span class="badge bg-light text-dark border ms-1">{{ order.status }}</span>
+              </small>
+            </div>
+            <div class="text-end">
+              <div class="fw-bold">{{ formatCurrency(order.total) }}</div>
+              <small class="text-muted">{{ order.itemCount }} item</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>

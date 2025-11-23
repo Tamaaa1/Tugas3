@@ -1,0 +1,300 @@
+<template id="tpl-stock">
+  <div>
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-bottom py-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="mb-0 text-primary fw-bold">
+            <i class="fas fa-boxes me-2"></i>Manajemen Stok Bahan Ajar UT
+          </h5>
+          <button class="btn btn-primary" @click="showAddForm = true">
+            <i class="fas fa-plus me-2"></i>Tambah Bahan Ajar
+          </button>
+        </div>
+      </div>
+      <div class="card-body p-4">
+        <!-- Filter Section -->
+        <div class="card border-0 bg-light mb-4">
+          <div class="card-body p-3">
+            <div class="row g-3">
+              <!-- Search -->
+              <div class="col-md-4">
+                <label class="form-label fw-semibold small text-muted text-uppercase">Pencarian</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-white border-end-0">
+                    <i class="fas fa-search text-muted"></i>
+                  </span>
+                  <input 
+                    type="text" 
+                    class="form-control border-start-0 ps-0" 
+                    v-model="searchTerm"
+                    placeholder="Cari kode, judul, atau lokasi..."
+                    @keyup.enter="performSearch"
+                    @keyup.esc="resetSearch"
+                  />
+                </div>
+              </div>
+              
+              <!-- Filters -->
+              <div class="col-md-2">
+                <label class="form-label fw-semibold small text-muted text-uppercase">UT Daerah</label>
+                <select class="form-select" v-model="filters.upbjj" @change="onUpbjjChange">
+                  <option value="">Semua Daerah</option>
+                  <option v-for="upbjj in upbjjOptions" :key="upbjj" :value="upbjj">{{ upbjj }}</option>
+                </select>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label fw-semibold small text-muted text-uppercase">Kategori</label>
+                <select class="form-select" v-model="filters.kategori" :disabled="!filters.upbjj">
+                  <option value="">Semua Kategori</option>
+                  <option v-for="kategori in availableKategori" :key="kategori" :value="kategori">{{ kategori }}</option>
+                </select>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label fw-semibold small text-muted text-uppercase">Kondisi</label>
+                <select class="form-select" v-model="filters.condition">
+                  <option value="">Semua Kondisi</option>
+                  <option value="aman">✓ Aman</option>
+                  <option value="menipis">⚠ Menipis</option>
+                  <option value="kosong">✗ Kosong</option>
+                </select>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label fw-semibold small text-muted text-uppercase">Urutkan</label>
+                <select class="form-select" v-model="sortBy">
+                  <option value="">Default</option>
+                  <option value="judul">Judul (A-Z)</option>
+                  <option value="harga">Harga (Termurah)</option>
+                  <option value="qty">Stok (Terendah)</option>
+                </select>
+              </div>
+            </div>
+            
+            <!-- Active Filters Summary -->
+            <div v-if="filters.upbjj || filters.kategori || filters.condition || searchTerm" class="mt-3 d-flex justify-content-between align-items-center">
+              <div class="small">
+                <span class="text-muted me-2">Filter Aktif:</span>
+                <span v-if="filters.upbjj" class="badge bg-primary me-1">{{ filters.upbjj }}</span>
+                <span v-if="filters.kategori" class="badge bg-info me-1">{{ filters.kategori }}</span>
+                <span v-if="filters.condition" class="badge bg-warning me-1">{{ filters.condition }}</span>
+                <span v-if="searchTerm" class="badge bg-success me-1">"{{ searchTerm }}"</span>
+              </div>
+              <button class="btn btn-sm btn-link text-decoration-none text-danger" @click="resetFilters">
+                <i class="fas fa-times me-1"></i>Reset Filter
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <!-- Desktop Table View -->
+        <div class="table-responsive d-none d-md-block">
+          <table class="table table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th class="border-0 rounded-start ps-3">Kode</th>
+                <th class="border-0">Judul</th>
+                <th class="border-0">Kategori</th>
+                <th class="border-0">UPBJJ</th>
+                <th class="border-0">Lokasi</th>
+                <th class="border-0 text-end">Harga</th>
+                <th class="border-0 text-end">Stok</th>
+                <th class="border-0 text-end">Safety</th>
+                <th class="border-0 text-center">Status</th>
+                <th class="border-0 rounded-end text-center pe-3">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in filteredItems" :key="item.id">
+                <td class="ps-3 fw-medium text-primary">{{ item.kode }}</td>
+                <td>{{ item.judul }}</td>
+                <td><span class="badge bg-light text-dark border">{{ item.kategori }}</span></td>
+                <td>{{ item.upbjj }}</td>
+                <td><small class="text-muted"><i class="fas fa-map-marker-alt me-1"></i>{{ item.lokasiRak }}</small></td>
+                <td class="text-end fw-bold text-dark">{{ formatCurrency(item.harga) }}</td>
+                <td class="text-end" :class="getQtyClass(item.qty, item.safety)">{{ formatQuantity(item.qty) }}</td>
+                <td class="text-end text-muted">{{ formatQuantity(item.safety) }}</td>
+                <td class="text-center">
+                  <status-badge 
+                    :qty="item.qty" 
+                    :safety="item.safety"
+                    :tooltip="item.catatanHTML"
+                  ></status-badge>
+                </td>
+                <td class="text-center pe-3">
+                  <div class="btn-group">
+                    <button class="btn btn-sm btn-light text-primary" @click="editItem(item)" title="Edit">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-light text-danger" @click="confirmDelete(item)" title="Hapus">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr v-if="filteredItems.length === 0">
+                <td colspan="10" class="text-center py-5">
+                  <div class="text-muted">
+                    <i class="fas fa-inbox fa-3x mb-3 opacity-50"></i>
+                    <p class="mb-0">Tidak ada data yang ditemukan</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mobile Card View -->
+        <div class="d-md-none">
+          <div v-for="item in filteredItems" :key="item.id" class="card border mb-3 shadow-sm">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                  <div class="fw-bold text-primary">{{ item.kode }}</div>
+                  <div class="fw-medium text-dark">{{ item.judul }}</div>
+                </div>
+                <status-badge 
+                  :qty="item.qty" 
+                  :safety="item.safety"
+                  :tooltip="item.catatanHTML"
+                ></status-badge>
+              </div>
+              
+              <div class="d-flex gap-2 mb-3">
+                <span class="badge bg-light text-dark border">{{ item.kategori }}</span>
+                <span class="badge bg-light text-muted border"><i class="fas fa-map-marker-alt me-1"></i>{{ item.lokasiRak }}</span>
+              </div>
+
+              <div class="row g-2 mb-3 small">
+                <div class="col-6">
+                  <div class="text-muted text-uppercase" style="font-size: 0.7rem;">Harga</div>
+                  <div class="fw-bold">{{ formatCurrency(item.harga) }}</div>
+                </div>
+                <div class="col-6">
+                  <div class="text-muted text-uppercase" style="font-size: 0.7rem;">UPBJJ</div>
+                  <div>{{ item.upbjj }}</div>
+                </div>
+                <div class="col-6">
+                  <div class="text-muted text-uppercase" style="font-size: 0.7rem;">Stok</div>
+                  <div :class="getQtyClass(item.qty, item.safety)" class="fw-bold">{{ formatQuantity(item.qty) }}</div>
+                </div>
+                <div class="col-6">
+                  <div class="text-muted text-uppercase" style="font-size: 0.7rem;">Safety</div>
+                  <div>{{ formatQuantity(item.safety) }}</div>
+                </div>
+              </div>
+
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-primary flex-grow-1" @click="editItem(item)">
+                  <i class="fas fa-edit me-1"></i>Edit
+                </button>
+                <button class="btn btn-sm btn-outline-danger flex-grow-1" @click="confirmDelete(item)">
+                  <i class="fas fa-trash me-1"></i>Hapus
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Empty State Mobile -->
+          <div v-if="filteredItems.length === 0" class="text-center py-5">
+            <div class="text-muted">
+              <i class="fas fa-inbox fa-3x mb-3 opacity-50"></i>
+              <p class="mb-0">Tidak ada data yang ditemukan</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="d-flex justify-content-between align-items-center mt-3 border-top pt-3">
+          <small class="text-muted">
+            Menampilkan <strong>{{ filteredItems.length }}</strong> dari <strong>{{ items.length }}</strong> data
+          </small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <crud-modal
+      :show="showAddForm || editingItem !== null"
+      :title="(editingItem ? 'Edit' : 'Tambah') + ' Bahan Ajar'"
+      :title-icon="editingItem ? 'fas fa-edit' : 'fas fa-plus'"
+      :submit-text="editingItem ? 'Update Data' : 'Simpan Data'"
+      @submit="submitForm"
+      @cancel="cancelForm"
+    >
+      <form @submit.prevent="submitForm" @keyup.enter.prevent="submitForm">
+        <div class="row g-4">
+          <!-- Left Column: Basic Info -->
+          <div class="col-md-6">
+            <h6 class="text-primary mb-3"><i class="fas fa-info-circle me-2"></i>Informasi Dasar</h6>
+            
+            <div class="mb-3">
+              <label class="form-label small fw-bold text-uppercase text-muted">Kode Bahan Ajar <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" v-model="formData.kode" placeholder="Contoh: EKMA4115" required />
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label small fw-bold text-uppercase text-muted">Judul <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" v-model="formData.judul" placeholder="Judul bahan ajar" required />
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label small fw-bold text-uppercase text-muted">Kategori <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" v-model="formData.kategori" placeholder="Contoh: Ekonomi" required />
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-bold text-uppercase text-muted">Catatan (HTML)</label>
+              <textarea class="form-control" v-model="formData.catatanHTML" rows="3" placeholder="Catatan tambahan..."></textarea>
+            </div>
+          </div>
+
+          <!-- Right Column: Details -->
+          <div class="col-md-6">
+            <h6 class="text-primary mb-3"><i class="fas fa-warehouse me-2"></i>Detail Stok & Lokasi</h6>
+            
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label class="form-label small fw-bold text-uppercase text-muted">UPBJJ <span class="text-danger">*</span></label>
+                <select class="form-select" v-model="formData.upbjj" required>
+                  <option value="">Pilih UPBJJ</option>
+                  <option v-for="upbjj in upbjjOptions" :key="upbjj" :value="upbjj">{{ upbjj }}</option>
+                </select>
+              </div>
+              <div class="col-6">
+                <label class="form-label small fw-bold text-uppercase text-muted">Lokasi Rak <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" v-model="formData.lokasiRak" placeholder="A-12-03" required />
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-bold text-uppercase text-muted">Harga Satuan <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text">Rp</span>
+                <input type="number" class="form-control" v-model.number="formData.harga" min="0" required />
+              </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label class="form-label small fw-bold text-uppercase text-muted">Stok Saat Ini <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" v-model.number="formData.qty" min="0" required />
+              </div>
+              <div class="col-6">
+                <label class="form-label small fw-bold text-uppercase text-muted">Safety Stock <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" v-model.number="formData.safety" min="0" required />
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-bold text-uppercase text-muted">Status <span class="text-danger">*</span></label>
+              <select class="form-select" v-model="formData.status" required>
+                <option value="aktif">Aktif</option>
+                <option value="tidak_aktif">Tidak Aktif</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </form>
+    </crud-modal>
+  </div>
+</template>

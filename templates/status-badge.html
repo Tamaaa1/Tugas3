@@ -1,0 +1,7 @@
+<template id="tpl-status">
+  <span 
+    :class="['badge', 'status-badge', 'status-' + statusClass]"
+    :title="tooltipText"
+    v-text="statusText"
+  ></span>
+</template>

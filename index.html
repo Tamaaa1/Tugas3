@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Pemesanan & Distribusi Bahan Ajar UT</title>
+    <link rel="stylesheet" href="./assets/css/style.css">
+    <!-- Bootstrap CSS untuk styling yang lebih baik -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <div class="container-fluid">
+            <!-- Header -->
+            <!-- Header -->
+            <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4 shadow-sm">
+                <div class="container-fluid">
+                    <a class="navbar-brand d-flex align-items-center text-wrap" href="#">
+                        <img src="./assets/img/UT.png" alt="Logo UT" class="bg-white rounded p-1 shadow-sm me-2" style="height: 40px; width: auto;">
+                        <span class="d-none d-sm-inline">Sistem Pemesanan & Distribusi Bahan Ajar</span>
+                        <span class="d-inline d-sm-none small">Sistem Bahan Ajar</span>
+                    </a>
+                    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav ms-auto d-lg-none mt-2">
+                            <li class="nav-item">
+                                <a class="nav-link" :class="{active: activeTab === 'stock'}" href="#" @click.prevent="activeTab = 'stock'">
+                                    <i class="fas fa-boxes me-2"></i>Stok Bahan Ajar
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" :class="{active: activeTab === 'tracking'}" href="#" @click.prevent="activeTab = 'tracking'">
+                                    <i class="fas fa-truck me-2"></i>Tracking DO
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" :class="{active: activeTab === 'order'}" href="#" @click.prevent="activeTab = 'order'">
+                                    <i class="fas fa-shopping-cart me-2"></i>Form Pemesanan
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Tab Navigation (Desktop) -->
+            <ul class="nav nav-tabs mb-4 d-none d-lg-flex">
+                <li class="nav-item">
+                    <button 
+                        class="nav-link" 
+                        :class="{active: activeTab === 'stock'}"
+                        @click="activeTab = 'stock'"
+                    >
+                        <i class="fas fa-boxes"></i> Stok Bahan Ajar
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button 
+                        class="nav-link" 
+                        :class="{active: activeTab === 'tracking'}"
+                        @click="activeTab = 'tracking'"
+                    >
+                        <i class="fas fa-truck"></i> Tracking DO
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button 
+                        class="nav-link" 
+                        :class="{active: activeTab === 'order'}"
+                        @click="activeTab = 'order'"
+                    >
+                        <i class="fas fa-shopping-cart"></i> Form Pemesanan
+                    </button>
+                </li>
+            </ul>
+
+            <!-- Mobile Tab Navigation (Scrollable) -->
+            <div class="d-lg-none mb-4 overflow-auto pb-2">
+                <div class="btn-group w-100" role="group">
+                    <button 
+                        type="button" 
+                        class="btn btn-outline-primary"
+                        :class="{active: activeTab === 'stock'}"
+                        @click="activeTab = 'stock'"
+                    >
+                        <i class="fas fa-boxes d-block mb-1"></i>
+                        <small>Stok</small>
+                    </button>
+                    <button 
+                        type="button" 
+                        class="btn btn-outline-primary"
+                        :class="{active: activeTab === 'tracking'}"
+                        @click="activeTab = 'tracking'"
+                    >
+                        <i class="fas fa-truck d-block mb-1"></i>
+                        <small>Tracking</small>
+                    </button>
+                    <button 
+                        type="button" 
+                        class="btn btn-outline-primary"
+                        :class="{active: activeTab === 'order'}"
+                        @click="activeTab = 'order'"
+                    >
+                        <i class="fas fa-shopping-cart d-block mb-1"></i>
+                        <small>Pesan</small>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Flash Message -->
+            <div v-if="flashMessage" :class="'alert alert-' + flashMessage.type + ' alert-dismissible fade show'" role="alert">
+                {{ flashMessage.text }}
+                <button type="button" class="btn-close" @click="clearFlashMessage"></button>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="tab-content">
+                <!-- Tab Stok Bahan Ajar -->
+                <div v-show="activeTab === 'stock'">
+                    <ba-stock-table 
+                        :items="bahanAjarList"
+                        @add-item="addBahanAjar"
+                        @update-item="updateBahanAjar"
+                        @delete-item="deleteBahanAjar"
+                        @show-flash="showFlash"
+                    ></ba-stock-table>
+                </div>
+
+                <!-- Tab Tracking DO -->
+                <div v-show="activeTab === 'tracking'">
+                    <do-tracking 
+                        :delivery-orders="deliveryOrders"
+                        @add-do="addDeliveryOrder"
+                        @show-flash="showFlash"
+                    ></do-tracking>
+                </div>
+
+                <!-- Tab Form Pemesanan -->
+                <div v-show="activeTab === 'order'">
+                    <order-form 
+                        :bahan-ajar-list="bahanAjarList"
+                        @create-order="createOrder"
+                        @show-flash="showFlash"
+                    ></order-form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Component -->
+        <app-modal 
+            :show="modal.show"
+            :title="modal.title"
+            :message="modal.message"
+            :type="modal.type"
+            @confirm="handleModalConfirm"
+            @cancel="closeModal"
+        ></app-modal>
+        </div>
+    </div>
+
+    <!-- Templates -->
+    <template id="tpl-status">
+        <span 
+            :class="['badge', 'status-badge', 'status-' + statusClass]"
+            :title="tooltipText"
+            v-text="statusText"
+        ></span>
+    </template>
+
+    <template id="tpl-modal">
+        <div v-if="show">
+            <div class="modal fade show" style="display: block;" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" v-text="title"></h5>
+                            <button type="button" class="btn-close" @click="$emit('cancel')"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p v-html="message"></p>
+                        </div>
+                        <div class="modal-footer">
+                            <button 
+                                v-if="type === 'confirm'"
+                                type="button" 
+                                class="btn btn-secondary" 
+                                @click="$emit('cancel')"
+                            >
+                                Batal
+                            </button>
+                            <button 
+                                type="button" 
+                                :class="['btn', type === 'confirm' ? 'btn-danger' : 'btn-primary']"
+                                @click="$emit('confirm')"
+                            >
+                                {{ type === 'confirm' ? 'Hapus' : 'OK' }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-backdrop fade show"></div>
+        </div>
+    </template>
+
+    <!-- Include other templates -->
+    <div style="display: none;">
+        <div id="templates-container"></div>
+    </div>
+
+    <!-- Scripts - Load Vue.js and Bootstrap first -->
+    <script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Load Templates and Initialize App -->
+    <script>
+        // Wait for Vue to be loaded
+        if (typeof Vue === 'undefined') {
+            console.error('Vue.js failed to load!');
+            alert('Vue.js gagal dimuat. Silakan refresh halaman.');
+        }
+
+        // Load external templates
+        function loadTemplate(templatePath, templateId) {
+            return fetch(templatePath)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    document.getElementById('templates-container').innerHTML += html;
+                    console.log('✓ Template loaded:', templatePath);
+                })
+                .catch(error => {
+                    console.error('✗ Error loading template:', templatePath, error);
+                    throw error;
+                });
+        }
+
+        // Timeout fallback
+        let appInitialized = false;
+        setTimeout(() => {
+            if (!appInitialized) {
+                console.error('✗ App initialization timeout');
+                alert('Aplikasi membutuhkan waktu terlalu lama untuk dimuat. Silakan refresh halaman.');
+            }
+        }, 10000); // 10 second timeout
+
+        // Load all templates first
+        console.log('Starting template loading...');
+        Promise.all([
+            loadTemplate('./templates/crud-modal.html', 'tpl-crud-modal'),
+            loadTemplate('./templates/stock-table.html', 'tpl-stock'),
+            loadTemplate('./templates/do-tracking.html', 'tpl-tracking'),
+            loadTemplate('./templates/order-form.html', 'tpl-order')
+        ]).then(() => {
+            console.log('✓ All templates loaded successfully');
+            // Initialize Vue app after templates are loaded
+            initializeApp();
+        }).catch(error => {
+            console.error('✗ Error loading templates:', error);
+            appInitialized = true;
+            alert('Error loading templates: ' + error.message + '\nSilakan pastikan server berjalan dengan benar.');
+        });
+
+        function initializeApp() {
+            console.log('Initializing app...');
+            // Load services and components sequentially
+            loadScript('./js/services/api.js')
+                .then(() => {
+                    console.log('API service loaded');
+                    return loadScript('./js/components/status-badge.js');
+                })
+                .then(() => {
+                    console.log('Status badge component loaded');
+                    return loadScript('./js/components/app-modal.js');
+                })
+                .then(() => {
+                    console.log('App modal component loaded');
+                    return loadScript('./js/components/crud-modal.js');
+                })
+                .then(() => {
+                    console.log('Modal component loaded');
+                    return loadScript('./js/components/stock-table.js');
+                })
+                .then(() => {
+                    console.log('Stock table component loaded');
+                    return loadScript('./js/components/do-tracking.js');
+                })
+                .then(() => {
+                    console.log('DO tracking component loaded');
+                    return loadScript('./js/components/order-form.js');
+                })
+                .then(() => {
+                    console.log('Order form component loaded');
+                    return loadScript('./js/app.js');
+                })
+                .then(() => {
+                    console.log('Main app loaded');
+                    appInitialized = true;
+                    console.log('✓ App ready!');
+                })
+                .catch(error => {
+                    console.error('✗ Error loading scripts:', error);
+                    appInitialized = true;
+                    alert('Error loading application: ' + error.message + '\nSilakan check console untuk detail error.');
+                });
+        }
+
+        function loadScript(src) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = () => {
+                    console.log('Loaded:', src);
+                    resolve();
+                };
+                script.onerror = (error) => {
+                    console.error('Failed to load:', src, error);
+                    reject(error);
+                };
+                document.head.appendChild(script);
+            });
+        }
+    </script>
+</body>
+</html>
