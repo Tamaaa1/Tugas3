@@ -11,7 +11,7 @@
       "qty": 150,
       "safety": 50,
       "status": "aktif",
-      "catatanHTML": "<b>Buku utama</b> untuk program S1 Ekonomi.<br/><small>Edisi terbaru tahun 2024</small>"
+      "catatanHTML": "<b>Buku utama</b> untuk program S1 Ekonomi.<br/><small>Edisi terbaru tahun 2025</small>"
     },
     {
       "id": 2,
@@ -89,7 +89,7 @@
       "qty": 120,
       "safety": 50,
       "status": "aktif",
-      "catatanHTML": "<b>Wajib</b> untuk semua mahasiswa.<br/>Edisi revisi 2023."
+      "catatanHTML": "<b>Wajib</b> untuk semua mahasiswa.<br/>Edisi revisi 2025."
     },
     {
       "id": 8,
@@ -117,19 +117,19 @@
         {"kode": "EKMA4111", "judul": "Pengantar Ekonomi Makro", "qty": 1},
         {"kode": "MKDU4111", "judul": "Pendidikan Agama Islam", "qty": 1}
       ],
-      "tanggalKirim": "15 November 2024",
+      "tanggalKirim": "23 November 2025",
       "totalHarga": 150000,
       "statusProgress": [
         {
-          "waktu": "2024-11-15T08:00:00",
+          "waktu": "2025-11-23T08:00:00",
           "keterangan": "Paket diterima di gudang"
         },
         {
-          "waktu": "2024-11-15T10:30:00",
+          "waktu": "2025-11-23T10:30:00",
           "keterangan": "Paket dalam proses packing"
         },
         {
-          "waktu": "2024-11-15T14:00:00",
+          "waktu": "2025-11-23T14:00:00",
           "keterangan": "Paket dikirim ke ekspedisi JNE"
         }
       ]
@@ -145,15 +145,15 @@
         {"kode": "MKDU4111", "judul": "Pendidikan Agama Islam", "qty": 1},
         {"kode": "MKDU4110", "judul": "Bahasa Indonesia", "qty": 1}
       ],
-      "tanggalKirim": "18 November 2024",
+      "tanggalKirim": "23 November 2025",
       "totalHarga": 125000,
       "statusProgress": [
         {
-          "waktu": "2024-11-18T09:15:00",
+          "waktu": "2025-11-23T09:15:00",
           "keterangan": "Pesanan diterima"
         },
         {
-          "waktu": "2024-11-18T11:00:00",
+          "waktu": "2025-11-23T11:00:00",
           "keterangan": "Sedang diproses"
         }
       ]
